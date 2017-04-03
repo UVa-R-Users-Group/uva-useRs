@@ -1,0 +1,57 @@
+name: "uva-useRs"
+navbar:
+  title: "uva useRs"
+  left:
+    - text: "/about"
+      href: index.html
+    - text: "/meetups"
+      menu:
+        - text: ":: upcoming ::"
+        - text: "may 2017"
+          href: may2017.html
+        - text: ":: past ::"
+        - text: "march 2017"
+          href: march2017.html
+        - text: "february 2017"
+          href: february2017.html
+        - text: "november 2016"
+          href: november2016.html
+        - text: "october 2016"
+          href: october2016.html
+        - text: "september 2016"
+          href: september2016.html
+        - text: "april 2016"
+          href: april2016.html
+        - text: "september 2015"
+          href: september2015.html
+        - text: "april 2015"
+          href: april2015.html
+        - text: "february 2015"
+          href: february2015.html
+        - text: "november 2014"
+          href: november2014.html
+        - text: "october 2014"
+          href: october2014.html
+        - text: "september 2014"
+          href: september2014.html
+    - text: "/docs"
+      menu:
+        - text: "data.table vs dplyr"
+    - text: "/resources"
+      href: resources.html
+
+output:
+  html_document:
+    theme: lumen
+    toc: false
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+    fig_align: center
+    css:
+      - https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css
+      - styles.css
+    includes:
+      after_body: include_footer.html
+      
+exclude: ["LICENSE", "README.markdown", "CONTRIBUTING.markdown", "*.Rproj", "*.key", "*.psd"]

@@ -1,0 +1,9 @@
+> We are the local R user group for the University of Virginia and Charlottesville area. R is a free software environment for statistical computing and graphics (<http://www.r-project.org/>). Our goal is to support and share R experience and knowledge among its users in the UVa community. We would like to hear how you use and enjoy the R language and statistical programming environment.
+
+<div class="list-group">
+  <a href="#" class="list-group-item">**419 members**</a>
+  <a href="#" class="list-group-item">**12 meetups**</a>
+  <a href="#" class="list-group-item">**2014::present**</a>
+</div>
+
+<a href="https://www.meetup.com/UVa-R-Users-Group/" class="btn btn-default btn-lg btn-block">for more information find us on meetup.com</a>

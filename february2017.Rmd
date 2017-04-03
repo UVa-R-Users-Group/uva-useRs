@@ -1,0 +1,9 @@
+---
+title: "February 2017: RStudio Conference Recap and Roundtable Discussion"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<https://www.meetup.com/UVa-R-Users-Group/events/237428593/>

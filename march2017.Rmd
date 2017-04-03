@@ -1,0 +1,9 @@
+---
+title: "March 2017: Lightning Talks"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<https://www.meetup.com/UVa-R-Users-Group/events/238302940/>
