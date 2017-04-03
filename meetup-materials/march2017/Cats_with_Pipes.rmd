@@ -1,0 +1,183 @@
+---
+title: "Piping with Purrr"
+author: "Nathan Day"
+date: "3/24/2017"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+---
+<div class = "container">
+  <img src="https://s-media-cache-ak0.pinimg.com/564x/66/ce/ae/66ceae51164293aa6ba0d6379685873a.jpg" alt="Drawing" style="width: 200px;"/>
+  <img src="http://myfunnymemes.com/wp-content/uploads/2015/04/Billionaire-Cat-Explores-Its-Billion-Dollar-Estate-Wearing-a-Top-Hat-Monocle-While-Smoking-a-Pipe_408x408.jpg" alt="Drawing" style="width: 200px;"/>
+  <img src="http://i.ebayimg.com/images/g/H0wAAOSwll1Wt483/s-l300.jpg" alt="Drawing" style="width: 200px;"/>
+</div>
+
+## Intro
+Piping `%>%` in R has been around since the debute of the `magrittr` library in 2014 and has been adopted by some of the most popular packages on CRAN. `Purrr` is a relavily new package, released in 2016, that tries to build on the popularity of piping and build more functional programming tools to R. This quick `data(mtcars)` run through aims to show the potential of pairing these two packages.
+
+---
+
+## The Packages
+``` {r, message = F}
+library(tidyverse) # purrr is in here already
+library(magrittr) # %>% alread in tidyverse, but %<>% and other variants are not
+```
+
+### Magrittr
+[Stefan Milton Bache](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html)
+
+#### Major Aims:
+
+* Descrease development time
+* Improve readability
+
+#### Six Rules:
+
+1. By default the left-hand side (LHS) will be piped in as the first argument of the function appearing on the right-hand side (RHS).
+```{r, eval = F}
+LHS %>% some_fxn(...) = some_fxn(LHS, ...)
+```
+2. `%>%` may be used in a nested fashion, e.g. it may appear in expressions within arguments.
+```{r, eval = F}
+summarise(mtcars %>% filter(cyl == 4), avg_mpg = mean(mpg))
+```
+3. When the LHS is needed at a position other than the first, one can use the dot,'.', as placeholder.
+```{r, eval = F}
+some_chr_vector %>% gsub("find", "replace", .)
+```
+4. The dot in a formula is not confused with a placeholder.
+```{r, eval = F}
+list_of_dataframes %>% map(~ lm(response ~ ., data = .))
+```
+5. Whenever only one argument is needed, the LHS, then one can omit the empty parentheses.
+```{r, eval = F}
+some_object %>% class
+```
+6. A pipeline with a dot (.) as LHS will create a unary function.
+```{r, eval = F}
+mean_rm <- . %>% mean(na.rm = T)
+```
+
+#### The reciprocal pipe `%<>%`
+Used for storing the result from the RHS evalution by overwriting the original LHS value. This is very useful with certain functions and especially in data cleaning scenarios.
+```{r, eval = F}
+some_chr_vector %<>% gsub("find", "replace", .) # now its saved
+some_chr_vector %<>% factor(levels = c("a","b")) # ready for ggplot()
+# Hadley doesn't like these %<>%, so thats why they don't load with library(tidyverse)
+# http://r4ds.had.co.nz/pipes.html#other-tools-from-magrittr #lame
+```
+
+#### Trend setting
+To play nicely with magrittr, functions should be defined with the data argument first, not like `lm(formula, data, ...)` or `qplot(x, y = NULL, ..., data)`. This allows minimal typing and maximum foucs on the series of actions. New `tidyverse` packages are designed with this in mind and `purrr` is no different.
+
+### Purrr
+[Hadley Wickham](https://blog.rstudio.org/2015/09/29/purrr-0-1-0/)
+
+#### Fills in functional programming tools
+Trys to imitate functional languages like Haskell or F# with tools that make sense for R.
+
+#### Introduces `map()` as tidyverse version of `lapply()`
+Since annonymous functions are everywhere in R, `lapply(..., function(x){ anything custom } )`, purrr's `map(.x, .f, ...)` is aimed at improving their syntax. This makes for code that is easier to understand and easie to type. `map()` is the major workhorse function. Let looks at its shorthand syntax features.
+
+```{r, eval = F}
+# no need for () if args < 2
+mtcars %>% split(.$cyl) %>%
+    map(class)
+
+# if args > 1 use ~ and magrittr's . syntax
+mtcars %>% split(.$cyl) %>%
+    map(~ lm(mpg ~ gear, data = .)) # same rules for flexible positioning
+```
+
+#### Varients like `map_df()` make for easily formatted output
+Maybe the most useful helper function is `map_df`. If the objects in `your_list` are already data frames (and they usually are), instead of using `map(your_list, ...) %>% do.call(rbind, .)` just use `map_df(your_list, ...)`. This is very useful for reading in raw data, `dir(raw_folder) %>% map_df(read.csv)`.
+
+Other helper functions like `map_chr` and `map_dbl` are similar to `vapply` and are useful for controlling output type for programming.
+
+#### `walk()` is the imaginary friend of `map()`
+If you ever just want to call a function for it's side effect, like when printing plots, `walk` is a nice option. If you have a list of plots, `plots_list`, calling `walk(plots_list, print)` is nice for writing your stored plots to a open graphics device.
+
+---
+
+## Why pipe?
+#### Syntatic sugar
+Pipes make code chunks easier to digest.
+
+Let look at the first 6 rows of `mtcars` sorted by `mpg`:
+``` {r, warning = F}
+data(mtcars)
+mtcars %<>% add_rownames # bc this should be the default
+mtcars$cyl %<>% as.factor # useful later on for group_by() and split()
+```
+``` {r, eval = F}
+# both do the same thing, which one do you like better?
+head(arrange(mtcars, mpg))
+mtcars %>% arrange(mpg) %>% head
+```
+* Alleviaes the need for nested functions.
+* Pipelines make following the logical progression easy.
+* Complex procedures are presented in a linear order.
+
+This also means pipes are not good for expressing multiple inputs or complex relationships, as they focus on the manipulating a single object.
+
+---
+
+#### More advantage with more steps
+Now lets group `mtcars` by number of `cyl` and get the top 4 cars for `mpg` from each group, then take the average of each numeric column.
+
+```{r, eval = F}
+# this ?
+summarise_if(top_n(group_by(mtcars, cyl), 4, mpg),is.numeric, mean)
+# or this ?
+mtcars %>%
+    group_by(cyl) %>%
+    top_n(4, mpg) %>% # doing `arrange %>% head` from above 
+    summarise_if(is.numeric, mean)
+
+```
+
+### Model fitting
+Now lets run through a hypothetical examples to show these two packages in action.
+
+This plot below, shows the linear model of the relationship between `disp` and `mpg` for each `cyl` level.
+```{r}
+ggplot(mtcars, aes(disp, mpg, color = cyl)) +
+    geom_point(size = 4) +
+    stat_smooth(method = "lm", se = F)
+```
+
+Suppose we want to make the same linear models ourselves.
+```{r}
+mtcars %>%
+    split(.$cyl) %>%
+    map(~ lm(mpg ~ disp, data = .)) -> lm_fits # not my fav but useful
+```
+
+`lm_fits` now contains a `list` of 3 models one for each `cyl` level.
+
+### Model Extraction
+
+Lets extract the model coeffiecients so we can replot the models manually with `geom_abline()`. Let's also make sure to get the data polished for ggplot at this step too.
+
+```{r}
+lm_fits %<>%
+    map_df(broom::tidy, .id = "cyl") %>% # love this map_df(tidy) combo!!!
+    select(cyl, term, estimate) %>%
+    spread(term, estimate) %>%
+    mutate(cyl = as.factor(cyl)) # a reciprocal pipe wont work inside mutate()
+
+# now plot
+ggplot(mtcars, aes(disp, mpg, color = cyl)) +
+    geom_point(size = 4) +
+    geom_abline(data = lm_fits, aes(slope = disp, intercept = `(Intercept)`, color = cyl))
+```
+
+Thats all for this quick walk through. 
+
+I hope you can begin to see the value of using pipes They can help keep your code environment clean and clutter free. Pipelines can also help when they left "open", with the results returning, because the objects are easy to investigate, which makes the next step easy to see. Bug squashing is easy with pipelines, adding a `View` on the end of the line or highlighting and runing before the `%>%`, lets you check into any code at any line.
+
+
+
